@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Raahi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .loading-spinner {
+            display: none;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .login-card {
+            background-color: var(--background-white);
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .dark-theme .login-card {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .form-input {
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            border-color: var(--border);
+        }
+        
+        .dark-theme .form-input {
+            background-color: rgba(30, 30, 30, 0.8);
+        }
+        
+        .login-bg {
+            background-image: url('https://images.pexels.com/photos/7621123/pexels-photo-7621123.jpeg?auto=compress&cs=tinysrgb&w=1600');
+            background-size: cover;
+            background-position: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            filter: blur(8px);
+            opacity: 0.2;
+        }
+        
+        .dark-theme .login-bg {
+            opacity: 0.1;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+    <!-- Theme Toggle Button -->
+    <button id="themeToggle" class="theme-toggle">
+        <i class="fas fa-moon"></i>
+    </button>
+    
+    <!-- Background Image with Blur -->
+    <div class="login-bg"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto login-card rounded-xl overflow-hidden">
+            <div class="p-8">
+                <div class="text-center mb-8">
+                    <img src="images/logo.svg" alt="Raahi Logo" class="w-32 h-32 mx-auto mb-4">
+                    <h1 class="text-3xl font-bold mb-2">Welcome to Raahi</h1>
+                    <p class="text-xl font-medium text-green-600 mb-2">Your College Carpool Buddy!</p>
+                    <p class="text-secondary">Connect with fellow Bennett students for convenient and eco-friendly rides.</p>
+                </div>
+
+                <!-- Login/Signup Tabs -->
+                <div class="flex border-b border-gray-200 mb-6">
+                    <button id="loginTab" class="flex-1 py-2 font-medium text-center border-b-2 border-green-600 text-green-600">Sign In</button>
+                    <button id="signupTab" class="flex-1 py-2 font-medium text-center text-gray-500">Create Account</button>
+                </div>
+
+                <!-- Email Login Form -->
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Bennett University Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-400"></i>
+                            </div>
+                            <input type="email" id="loginEmail" class="form-input pl-10 block w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="your.name@bennett.edu.in" pattern=".+@bennett\.edu\.in$" required>
+                        </div>
+                        <p id="loginEmailError" class="error-message">Please use your Bennett University email address (@bennett.edu.in)</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" id="loginPassword" class="form-input pl-10 block w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Enter your password" required>
+                        </div>
+                        <p id="loginPasswordError" class="error-message">Password must be at least 6 characters</p>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="remember" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                            <label for="remember" class="ml-2 block text-sm">Remember me</label>
+                        </div>
+                        <a href="#" id="forgotPassword" class="text-sm font-medium text-green-600 hover:text-green-500">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" id="loginButton" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        <span>Sign In</span>
+                        <div id="loginSpinner" class="loading-spinner ml-2"></div>
+                    </button>
+                    <p id="loginError" class="error-message text-center"></p>
+                </form>
+
+                <!-- Signup Form (Initially Hidden) -->
+                <form id="signupForm" class="space-y-6 hidden">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Bennett University Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-400"></i>
+                            </div>
+                            <input type="email" id="signupEmail" class="form-input pl-10 block w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="your.name@bennett.edu.in" pattern=".+@bennett\.edu\.in$" required>
+                        </div>
+                        <p id="signupEmailError" class="error-message">Please use your Bennett University email address (@bennett.edu.in)</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" id="signupPassword" class="form-input pl-10 block w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Create a password (min. 6 characters)" required>
+                        </div>
+                        <p id="signupPasswordError" class="error-message">Password must be at least 6 characters</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Confirm Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" id="confirmPassword" class="form-input pl-10 block w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Confirm your password" required>
+                        </div>
+                        <p id="confirmPasswordError" class="error-message">Passwords do not match</p>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="termsAgree" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" required>
+                        <label for="termsAgree" class="ml-2 block text-sm">
+                            I agree to the <a href="#" class="text-green-600 hover:text-green-500">Terms of Service</a> and <a href="#" class="text-green-600 hover:text-green-500">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" id="signupButton" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        <span>Create Account</span>
+                        <div id="signupSpinner" class="loading-spinner ml-2"></div>
+                    </button>
+                    <p id="signupError" class="error-message text-center"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="max-w-2xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card p-6 rounded-xl text-center">
+                <i class="fas fa-shield-alt text-3xl text-green-600 mb-4"></i>
+                <h3 class="font-semibold mb-2">Verified Community</h3>
+                <p class="text-sm">Exclusive to Bennett University students for a safe carpooling experience.</p>
+            </div>
+            <div class="card p-6 rounded-xl text-center">
+                <i class="fas fa-leaf text-3xl text-green-600 mb-4"></i>
+                <h3 class="font-semibold mb-2">Eco-Friendly</h3>
+                <p class="text-sm">Reduce your carbon footprint by sharing rides with fellow students.</p>
+            </div>
+            <div class="card p-6 rounded-xl text-center">
+                <i class="fas fa-coins text-3xl text-green-600 mb-4"></i>
+                <h3 class="font-semibold mb-2">Save Money</h3>
+                <p class="text-sm">Split travel costs and make your commute more affordable.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Theme Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const icon = themeToggle.querySelector('i');
+            
+            // Check for saved theme preference or use preferred color scheme
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                body.classList.add('dark-theme');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            
+            // Toggle theme on button click
+            themeToggle.addEventListener('click', function() {
+                body.classList.toggle('dark-theme');
+                
+                if (body.classList.contains('dark-theme')) {
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            });
+        });
+    </script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase functions
+        import { 
+            registerUser, 
+            loginUser, 
+            getCurrentUser, 
+            getUserProfile 
+        } from './firebase.js';
+
+        // DOM Elements
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        
+        // Login Elements
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginEmailError = document.getElementById('loginEmailError');
+        const loginPasswordError = document.getElementById('loginPasswordError');
+        const loginError = document.getElementById('loginError');
+        const loginButton = document.getElementById('loginButton');
+        const loginSpinner = document.getElementById('loginSpinner');
+        
+        // Signup Elements
+        const signupEmail = document.getElementById('signupEmail');
+        const signupPassword = document.getElementById('signupPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const signupEmailError = document.getElementById('signupEmailError');
+        const signupPasswordError = document.getElementById('signupPasswordError');
+        const confirmPasswordError = document.getElementById('confirmPasswordError');
+        const signupError = document.getElementById('signupError');
+        const signupButton = document.getElementById('signupButton');
+        const signupSpinner = document.getElementById('signupSpinner');
+        
+        // Tab switching
+        loginTab.addEventListener('click', function() {
+            loginTab.classList.add('border-b-2', 'border-green-600', 'text-green-600');
+            signupTab.classList.remove('border-b-2', 'border-green-600', 'text-green-600');
+            signupTab.classList.add('text-gray-500');
+            
+            loginForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+            
+            // Clear errors
+            loginError.textContent = '';
+            loginError.style.display = 'none';
+        });
+        
+        signupTab.addEventListener('click', function() {
+            signupTab.classList.add('border-b-2', 'border-green-600', 'text-green-600');
+            loginTab.classList.remove('border-b-2', 'border-green-600', 'text-green-600');
+            loginTab.classList.add('text-gray-500');
+            
+            signupForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            
+            // Clear errors
+            signupError.textContent = '';
+            signupError.style.display = 'none';
+        });
+        
+        // Email validation
+        function validateBennettEmail(email) {
+            return email.endsWith('@bennett.edu.in');
+        }
+        
+        loginEmail.addEventListener('input', function() {
+            if (!validateBennettEmail(this.value) && this.value.length > 0) {
+                loginEmailError.style.display = 'block';
+            } else {
+                loginEmailError.style.display = 'none';
+            }
+        });
+        
+        signupEmail.addEventListener('input', function() {
+            if (!validateBennettEmail(this.value) && this.value.length > 0) {
+                signupEmailError.style.display = 'block';
+            } else {
+                signupEmailError.style.display = 'none';
+            }
+        });
+        
+        // Password validation
+        loginPassword.addEventListener('input', function() {
+            if (this.value.length < 6 && this.value.length > 0) {
+                loginPasswordError.style.display = 'block';
+            } else {
+                loginPasswordError.style.display = 'none';
+            }
+        });
+        
+        signupPassword.addEventListener('input', function() {
+            if (this.value.length < 6 && this.value.length > 0) {
+                signupPasswordError.style.display = 'block';
+            } else {
+                signupPasswordError.style.display = 'none';
+            }
+            
+            // Check confirm password match
+            if (confirmPassword.value.length > 0 && this.value !== confirmPassword.value) {
+                confirmPasswordError.style.display = 'block';
+            } else if (confirmPassword.value.length > 0) {
+                confirmPasswordError.style.display = 'none';
+            }
+        });
+        
+        confirmPassword.addEventListener('input', function() {
+            if (this.value !== signupPassword.value) {
+                confirmPasswordError.style.display = 'block';
+            } else {
+                confirmPasswordError.style.display = 'none';
+            }
+        });
+        
+        // Login form submission
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Reset errors
+            loginError.textContent = '';
+            loginError.style.display = 'none';
+            
+            const email = loginEmail.value;
+            const password = loginPassword.value;
+            
+            // Validate Bennett email
+            if (!validateBennettEmail(email)) {
+                loginEmailError.style.display = 'block';
+                return;
+            }
+            
+            // Validate password length
+            if (password.length < 6) {
+                loginPasswordError.style.display = 'block';
+                return;
+            }
+            
+            // Show loading spinner
+            loginButton.disabled = true;
+            loginSpinner.style.display = 'block';
+            
+            try {
+                // Attempt login
+                const user = await loginUser(email, password);
+                
+                // Check if user has a profile
+                const profile = await getUserProfile(user.uid);
+                
+                // Redirect based on profile completion
+                if (profile && profile.isProfileComplete) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    window.location.href = 'complete-profile.html';
+                }
+            } catch (error) {
+                // Handle login errors
+                loginButton.disabled = false;
+                loginSpinner.style.display = 'none';
+                
+                let errorMessage = 'An error occurred during login. Please try again.';
+                
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMessage = 'Invalid email or password. Please try again.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMessage = 'Too many failed login attempts. Please try again later.';
+                }
+                
+                loginError.textContent = errorMessage;
+                loginError.style.display = 'block';
+                
+                console.error('Login error:', error);
+            }
+        });
+        
+        // Signup form submission
+        signupForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Reset errors
+            signupError.textContent = '';
+            signupError.style.display = 'none';
+            
+            const email = signupEmail.value;
+            const password = signupPassword.value;
+            const confirmPwd = confirmPassword.value;
+            
+            // Validate Bennett email
+            if (!validateBennettEmail(email)) {
+                signupEmailError.style.display = 'block';
+                return;
+            }
+            
+            // Validate password length
+            if (password.length < 6) {
+                signupPasswordError.style.display = 'block';
+                return;
+            }
+            
+            // Validate password match
+            if (password !== confirmPwd) {
+                confirmPasswordError.style.display = 'block';
+                return;
+            }
+            
+            // Validate terms agreement
+            if (!termsAgree.checked) {
+                signupError.textContent = 'You must agree to the Terms of Service and Privacy Policy.';
+                signupError.style.display = 'block';
+                return;
+            }
+            
+            // Show loading spinner
+            signupButton.disabled = true;
+            signupSpinner.style.display = 'block';
+            
+            try {
+                // Attempt registration
+                const user = await registerUser(email, password);
+                
+                // Redirect to profile completion
+                window.location.href = 'complete-profile.html';
+            } catch (error) {
+                // Handle signup errors
+                signupButton.disabled = false;
+                signupSpinner.style.display = 'none';
+                
+                let errorMessage = 'An error occurred during registration. Please try again.';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'This email is already registered. Please login instead.';
+                }
+                
+                signupError.textContent = errorMessage;
+                signupError.style.display = 'block';
+                
+                console.error('Signup error:', error);
+            }
+        });
+        
+        // Check if user is already logged in
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const user = await getCurrentUser();
+                
+                if (user) {
+                    // User is already logged in, redirect to dashboard
+                    const profile = await getUserProfile(user.uid);
+                    
+                    if (profile && profile.isProfileComplete) {
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        window.location.href = 'complete-profile.html';
+                    }
+                }
+            } catch (error) {
+                console.error('Auth state check error:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>
